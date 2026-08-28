@@ -1,0 +1,26 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/daily-review/daily-review",
+    "pages/stock-tracking/stock-tracking",
+    "pages/strategy-selection/strategy-selection"
+  ],
+  "window": {
+    "navigationBarTitleText": "A股投资策略平台",
+    "navigationBarBackgroundColor": "#0d1517",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#081012",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#81918f",
+    "selectedColor": "#d8b06b",
+    "backgroundColor": "#0d1517",
+    "borderStyle": "black",
+    "list": [
+      { "pagePath": "pages/daily-review/daily-review", "text": "每日复盘" },
+      { "pagePath": "pages/stock-tracking/stock-tracking", "text": "个股追踪" },
+      { "pagePath": "pages/strategy-selection/strategy-selection", "text": "策略选股" }
+    ]
+  }
+}

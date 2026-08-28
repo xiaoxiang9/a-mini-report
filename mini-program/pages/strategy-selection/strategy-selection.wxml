@@ -1,0 +1,1 @@
+<view class="module-page"><view class="module-kicker">STRATEGY SELECTION</view><view class="module-title">{{title}}</view><view class="module-message">{{message}}</view><view class="coming-soon">即将上线</view></view>

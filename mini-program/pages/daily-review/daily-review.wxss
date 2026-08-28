@@ -1,0 +1,1 @@
+.module-page { padding: 100rpx 48rpx; }.module-kicker { color: #81918f; font-size: 20rpx; letter-spacing: 4rpx; }.module-title { margin-top: 34rpx; font-size: 48rpx; }.module-message { margin-top: 24rpx; color: #aebebb; font-size: 28rpx; }

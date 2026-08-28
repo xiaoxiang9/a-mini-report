@@ -1,0 +1,20 @@
+<view class="page-shell">
+  <view class="eyebrow">A-STOCK / STRATEGY DESK</view>
+  <view class="hero">
+    <view class="hero-title">{{summary.productName}}</view>
+    <view class="hero-tagline">{{summary.tagline}}</view>
+    <view class="hero-line"></view>
+    <view class="status-label">MARKET STATUS</view>
+    <view class="status-text">{{summary.statusText}}</view>
+  </view>
+  <view wx:if="{{loading}}" class="loading">正在读取平台状态…</view>
+  <view wx:if="{{error}}" class="error">{{error}} <text class="retry" bindtap="retry">重新加载</text></view>
+  <view class="section-head"><text>探索平台</text><text class="section-note">CORE MODULES</text></view>
+  <view class="feature-list">
+    <view wx:for="{{summary.features}}" wx:key="key" class="feature-card {{item.status === 'available' ? 'is-active' : 'is-muted'}}" data-key="{{item.key}}" data-status="{{item.status}}" bindtap="openFeature">
+      <view class="feature-index">0{{index + 1}}</view>
+      <view class="feature-copy"><view class="feature-title">{{item.title}}</view><view class="feature-description">{{item.description}}</view></view>
+      <view class="feature-status">{{item.status === 'available' ? '进入 →' : '即将上线'}}</view>
+    </view>
+  </view>
+</view>

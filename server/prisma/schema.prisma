@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model PlatformConfig {
+  id         Int            @id @default(autoincrement())
+  productName String
+  tagline    String
+  statusText String
+  features   FeatureEntry[]
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+}
+
+model FeatureEntry {
+  id             Int            @id @default(autoincrement())
+  key            String         @unique
+  title          String
+  description    String
+  status         String
+  sortOrder      Int
+  platformConfigId Int
+  platformConfig PlatformConfig @relation(fields: [platformConfigId], references: [id], onDelete: Cascade)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([platformConfigId, sortOrder])
+}

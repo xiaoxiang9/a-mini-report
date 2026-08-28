@@ -1,0 +1,24 @@
+name: Deploy to Tencent Cloud Server
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.TENCENT_SERVER_HOST }}
+          username: ${{ secrets.TENCENT_SERVER_USER }}
+          key: ${{ secrets.TENCENT_SERVER_SSH_KEY }}
+          port: ${{ secrets.TENCENT_SERVER_PORT || 22 }}
+          script: |
+            set -e
+            cd /opt/a-mini-report
+            git fetch origin main
+            git reset --hard origin/main
+            docker compose --env-file .env -f docker-compose.prod.yml up -d --build
+            docker image prune -f

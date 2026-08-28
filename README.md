@@ -31,7 +31,23 @@ docker-compose.yml     本地 MySQL 8
 3. 用微信开发者工具导入 `mini-program/`。
 4. 若开发者工具不允许访问本机服务，在“详情 → 本地设置”勾选“不校验合法域名、web-view（业务域名）、TLS 版本以及 HTTPS 证书”。
 
-开发环境 API 地址默认是 `http://127.0.0.1:3000`，可在 `mini-program/app.js` 和 `server/.env` 中调整。
+开发环境 API 地址默认是 `http://124.220.34.112:3000`，可在 `mini-program/app.js` 和 `server/.env` 中调整。当前使用公网 IP 仅用于开发者工具验证；小程序生产发布需要备案域名和 HTTPS。
+
+## 腾讯云服务器部署
+
+服务器执行一次初始化（服务器需能访问 GitHub）：
+
+```bash
+dnf install -y git docker-compose-plugin
+systemctl enable --now docker
+git clone https://github.com/xiaoxiang9/a-mini-report.git /opt/a-mini-report
+cd /opt/a-mini-report
+cp .env.production.example .env
+vi .env
+docker compose --env-file .env -f docker-compose.prod.yml up -d --build
+```
+
+GitHub Actions 需要配置 `TENCENT_SERVER_HOST`、`TENCENT_SERVER_USER`、`TENCENT_SERVER_SSH_KEY` 和 `TENCENT_SERVER_PORT` 四个仓库 Secrets。
 
 ## API
 

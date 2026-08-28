@@ -3,5 +3,6 @@ server/dist/
 server/.env
 server/.env.production
 /.env
+mini-program/project.private.config.json
 server/prisma/*.db
 .DS_Store

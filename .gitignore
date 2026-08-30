@@ -1,5 +1,10 @@
 server/node_modules/
 server/dist/
+web/node_modules/
+web/dist/
+web/*.tsbuildinfo
+web/vite.config.js
+web/vite.config.d.ts
 server/.env
 server/.env.production
 /.env

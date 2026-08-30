@@ -1,6 +1,7 @@
 from collections.abc import Callable
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.application.home.get_home_summary import GetHomeSummary
 from app.infrastructure.database.health import check_database
@@ -28,6 +29,17 @@ def create_app(
     stock_provider: StockDataProvider | None = None,
 ) -> FastAPI:
     app = FastAPI(title="A股投资策略平台 API", version="0.1.0")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[
+            "http://127.0.0.1:5173",
+            "http://localhost:5173",
+            "https://myxiang.online",
+            "https://www.myxiang.online",
+        ],
+        allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type"],
+    )
     if home_use_case is None:
         session = SessionFactory()
         home_use_case = GetHomeSummary(SqlAlchemyHomeSummaryRepository(session))

@@ -33,3 +33,19 @@ def test_health_and_home_summary_keep_existing_api_contract() -> None:
             }
         ],
     }
+
+
+def test_local_web_origin_can_call_api() -> None:
+    client = TestClient(create_app(StubHomeUseCase(), lambda: "up"))
+
+    response = client.options(
+        "/api/stocks/tracking",
+        headers={
+            "Origin": "http://127.0.0.1:5173",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "content-type",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://127.0.0.1:5173"

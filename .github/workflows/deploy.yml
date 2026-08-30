@@ -10,6 +10,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Build Web
+        run: |
+          cd web
+          npm ci
+          npm run build
       - name: Upload source and deploy
         env:
           DEPLOY_HOST: ${{ secrets.TENCENT_SERVER_HOST }}
@@ -21,8 +26,10 @@ jobs:
           install -m 600 /dev/null "$RUNNER_TEMP/deploy_key"
           printf '%s\n' "$DEPLOY_KEY" > "$RUNNER_TEMP/deploy_key"
           ssh_args=(-i "$RUNNER_TEMP/deploy_key" -p "$DEPLOY_PORT" -o StrictHostKeyChecking=accept-new)
-          ssh "${ssh_args[@]}" "$DEPLOY_USER@$DEPLOY_HOST" 'mkdir -p /opt/a-mini-report/server'
+          ssh "${ssh_args[@]}" "$DEPLOY_USER@$DEPLOY_HOST" 'mkdir -p /opt/a-mini-report/server /opt/a-mini-report/web /tmp/a-mini-report-deploy'
           scp "${ssh_args[@]}" docker-compose.prod.yml .env.production.example README.md "$DEPLOY_USER@$DEPLOY_HOST:/opt/a-mini-report/"
           scp -r "${ssh_args[@]}" server "$DEPLOY_USER@$DEPLOY_HOST:/opt/a-mini-report/"
-          ssh "${ssh_args[@]}" "$DEPLOY_USER@$DEPLOY_HOST" 'set -e; cd /opt/a-mini-report; if [ ! -f .env ]; then app_password=$(openssl rand -hex 24); root_password=$(openssl rand -hex 24); umask 077; printf "MYSQL_PASSWORD=%s\nMYSQL_ROOT_PASSWORD=%s\n" "$app_password" "$root_password" > .env; fi; docker compose --env-file .env -f docker-compose.prod.yml up -d --build; docker image prune -f'
+          scp "${ssh_args[@]}" deploy/nginx/myxiang.online.conf "$DEPLOY_USER@$DEPLOY_HOST:/tmp/a-mini-report-deploy/"
+          scp -r "${ssh_args[@]}" web/dist "$DEPLOY_USER@$DEPLOY_HOST:/opt/a-mini-report/web/"
+          ssh "${ssh_args[@]}" "$DEPLOY_USER@$DEPLOY_HOST" 'set -e; install -m 644 /tmp/a-mini-report-deploy/myxiang.online.conf /www/server/panel/vhost/nginx/myxiang.online.conf; cd /opt/a-mini-report; if [ ! -f .env ]; then app_password=$(openssl rand -hex 24); root_password=$(openssl rand -hex 24); umask 077; printf "MYSQL_PASSWORD=%s\nMYSQL_ROOT_PASSWORD=%s\n" "$app_password" "$root_password" > .env; fi; docker compose --env-file .env -f docker-compose.prod.yml up -d --build; nginx -t; kill -HUP "$(cat /www/server/nginx/logs/nginx.pid)"; docker image prune -f; rm -rf /tmp/a-mini-report-deploy'
           rm -f "$RUNNER_TEMP/deploy_key"

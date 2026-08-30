@@ -35,19 +35,17 @@ docker-compose.yml     本地 MySQL 8
 
 ## 腾讯云服务器部署
 
-服务器执行一次初始化（服务器需能访问 GitHub）：
+服务器执行一次初始化：
 
 ```bash
 dnf install -y git docker-compose-plugin
 systemctl enable --now docker
-git clone https://github.com/xiaoxiang9/a-mini-report.git /opt/a-mini-report
-cd /opt/a-mini-report
-cp .env.production.example .env
-vi .env
-docker compose --env-file .env -f docker-compose.prod.yml up -d --build
+mkdir -p /opt/a-mini-report
 ```
 
-GitHub Actions 需要配置 `TENCENT_SERVER_HOST`、`TENCENT_SERVER_USER`、`TENCENT_SERVER_SSH_KEY` 和 `TENCENT_SERVER_PORT` 四个仓库 Secrets。
+GitHub Actions 会在 GitHub Runner 构建 Web，然后通过原生 `scp` 上传 `web/dist`、后端源码和 Nginx 配置，再在服务器执行 Docker Compose 更新。需要配置 `TENCENT_SERVER_HOST`、`TENCENT_SERVER_USER`、`TENCENT_SERVER_SSH_KEY` 和 `TENCENT_SERVER_PORT` 四个仓库 Secrets。
+
+Web 地址为 `https://myxiang.online/`，API 地址为 `https://myxiang.online/api/`。Nginx 配置模板位于 `deploy/nginx/myxiang.online.conf`。
 
 ## API
 

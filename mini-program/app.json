@@ -3,6 +3,7 @@
     "pages/home/home",
     "pages/daily-review/daily-review",
     "pages/stock-tracking/stock-tracking",
+    "pages/stock-detail/stock-detail",
     "pages/strategy-selection/strategy-selection"
   ],
   "window": {

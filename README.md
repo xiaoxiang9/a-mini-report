@@ -44,7 +44,7 @@ systemctl enable --now docker
 mkdir -p /opt/a-mini-report
 ```
 
-GitHub Actions 会在 GitHub Runner 构建 Web，然后通过原生 `scp` 上传 `web/dist`、后端源码和 Nginx 配置，再在服务器执行 Docker Compose 更新。需要配置 `TENCENT_SERVER_HOST`、`TENCENT_SERVER_USER`、`TENCENT_SERVER_SSH_KEY` 和 `TENCENT_SERVER_PORT` 四个仓库 Secrets。
+GitHub Actions 会在 GitHub Runner 构建 Web，然后通过原生 `scp` 上传 `web/dist`、后端源码和 Nginx 配置，再在服务器执行 Docker Compose 更新。需要配置 `TENCENT_SERVER_HOST`、`TENCENT_SERVER_USER`、`TENCENT_SERVER_SSH_KEY`、`TENCENT_SERVER_PORT` 和服务器 `.env` 中的 `TUSHARE_TOKEN`。
 
 Web 地址为 `https://myxiang.online/`，API 地址为 `https://myxiang.online/api/`。Nginx 配置模板位于 `deploy/nginx/myxiang.online.conf`。
 
@@ -52,6 +52,13 @@ Web 地址为 `https://myxiang.online/`，API 地址为 `https://myxiang.online/
 
 - `GET /api/health`：服务和 MySQL 健康检查。
 - `GET /api/home/summary`：从 MySQL 读取欢迎页摘要和三个能力入口。
+- `GET /api/stocks/tracking`：获取公共个股追踪列表。
+- `GET /api/stocks/{ts_code}`：获取个股详情和估值历史。
+- `POST /api/stocks/tracking`：添加股票，body 为 `{ "tsCode": "600519.SH" }`。
+- `DELETE /api/stocks/{ts_code}`：取消追踪但保留历史数据。
+- `POST /api/stocks/sync`：手动执行一次追踪股票同步。
+
+个股数据优先使用 Tushare 的 `stock_basic`、`trade_cal`、`daily` 和 `daily_basic` 接口；生产 scheduler 每天 17:00（Asia/Shanghai）自动执行。Token 仅通过环境变量 `TUSHARE_TOKEN` 配置。
 
 ## 验证
 

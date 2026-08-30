@@ -8,9 +8,11 @@ version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
   "fastapi>=0.116,<1",
+  "apscheduler>=3.11,<4",
   "pydantic-settings>=2.10,<3",
   "pymysql>=1.1,<2",
   "sqlalchemy>=2.0,<3",
+  "tushare>=1.4,<2",
   "uvicorn[standard]>=0.35,<1",
 ]
 

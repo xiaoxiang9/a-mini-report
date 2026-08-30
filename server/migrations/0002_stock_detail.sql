@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS `StockDetail` (
+    `tsCode` VARCHAR(16) NOT NULL,
+    `stockName` VARCHAR(64) NOT NULL,
+    `exchange` VARCHAR(8) NOT NULL,
+    `isTracked` BOOLEAN NOT NULL DEFAULT TRUE,
+    `currentPrice` DECIMAL(14,4) NULL,
+    `change7dPercent` DECIMAL(14,4) NULL,
+    `peTtm` DECIMAL(14,4) NULL,
+    `pePercentile` DECIMAL(14,4) NULL,
+    `pb` DECIMAL(14,4) NULL,
+    `pbPercentile` DECIMAL(14,4) NULL,
+    `valuationHistoryJson` LONGTEXT NOT NULL,
+    `latestTradeDate` DATE NULL,
+    `dataSource` VARCHAR(32) NULL,
+    `lastSyncedAt` DATETIME(3) NULL,
+    `syncError` VARCHAR(512) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (`tsCode`),
+    INDEX `StockDetail_isTracked_updatedAt_idx` (`isTracked`, `updatedAt`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

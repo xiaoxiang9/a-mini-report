@@ -1,0 +1,1 @@
+"""Stock tracking infrastructure adapters."""

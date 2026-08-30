@@ -1,5 +1,9 @@
 server/node_modules/
 server/dist/
+server/.venv/
+server/__pycache__/
+server/.pytest_cache/
+server/*.egg-info/
 web/node_modules/
 web/dist/
 web/*.tsbuildinfo

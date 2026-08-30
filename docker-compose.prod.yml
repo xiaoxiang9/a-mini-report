@@ -20,7 +20,7 @@ services:
       context: ./server
     restart: unless-stopped
     environment:
-      DATABASE_URL: mysql://app:${MYSQL_PASSWORD}@mysql:3306/a_stock_platform
+      DATABASE_URL: mysql+pymysql://app:${MYSQL_PASSWORD}@mysql:3306/a_stock_platform
       PORT: 3000
     depends_on:
       mysql:

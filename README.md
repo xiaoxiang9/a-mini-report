@@ -1,16 +1,18 @@
 # A股投资策略平台
 
-微信原生小程序 + Node.js/TypeScript DDD 后端 + Prisma/MySQL。
+微信原生小程序 + React/Web + Python/FastAPI DDD 后端 + SQLAlchemy/MySQL。
 
 ## 项目结构
 
 ```text
 mini-program/  微信小程序前端
-server/        Fastify 后端
-  src/interfaces      HTTP 路由与响应映射
-  src/application      用例编排
-  src/domain           业务领域与仓储接口
-  src/infrastructure   Prisma、MySQL、配置和健康检查
+server/        FastAPI Python 后端
+  app/interfaces      HTTP 路由与响应映射
+  app/application     用例编排
+  app/domain          业务领域与仓储接口
+  app/infrastructure  SQLAlchemy、MySQL、配置和健康检查
+  migrations/         MySQL 兼容迁移基线
+web/            React Web 前端
 docker-compose.yml     本地 MySQL 8
 ```
 
@@ -21,11 +23,10 @@ docker-compose.yml     本地 MySQL 8
 
    ```bash
    cd server
+   python3 -m venv .venv
+   .venv/bin/pip install -e '.[dev]'
    cp .env.example .env
-   npm install
-   npx prisma migrate dev --name init
-   npm run seed
-   npm run dev
+   .venv/bin/uvicorn app.main:app --reload --port 3000
    ```
 
 3. 用微信开发者工具导入 `mini-program/`。
@@ -56,9 +57,9 @@ Web 地址为 `https://myxiang.online/`，API 地址为 `https://myxiang.online/
 
 ```bash
 cd server
-npm test -- --run
-npm run typecheck
-npm run build
+.venv/bin/python -m pytest -q
+.venv/bin/python -m compileall app tests
+docker build -t a-stock-platform-server .
 cd ..
 node --test mini-program/services/fallback.test.js
 ```

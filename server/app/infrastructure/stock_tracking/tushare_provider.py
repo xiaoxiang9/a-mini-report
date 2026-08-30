@@ -26,15 +26,20 @@ class TushareStockDataProvider(StockDataProvider):
         if calendar.empty:
             raise LookupError("NO_RECENT_TRADE_DATE")
         trade_dates = sorted(calendar["cal_date"].astype(str).tolist())
-        latest_trade_date = trade_dates[-1]
-        daily = self._pro.daily(ts_code=ts_code, start_date=start, end_date=latest_trade_date)
+        calendar_latest_date = trade_dates[-1]
+        history_frame = self._pro.daily_basic(ts_code=ts_code, start_date="20100101", end_date=calendar_latest_date)
+        if history_frame.empty:
+            latest_trade_date = calendar_latest_date
+        else:
+            latest_trade_date = str(history_frame["trade_date"].astype(str).max())
+
+        daily = self._pro.daily(ts_code=ts_code, start_date=start, end_date=calendar_latest_date)
         daily = daily.sort_values("trade_date")
+        daily = daily[daily["trade_date"].astype(str) <= latest_trade_date]
         prices = tuple(float(value) for value in daily.tail(7)["close"].tolist())
-        basic_daily = self._pro.daily_basic(ts_code=ts_code, trade_date=latest_trade_date)
-        row = basic_daily.iloc[0] if not basic_daily.empty else None
+        row = history_frame[history_frame["trade_date"].astype(str) == latest_trade_date].iloc[0] if not history_frame.empty else None
         pe_ttm = float(row["pe_ttm"]) if row is not None and row.get("pe_ttm") == row.get("pe_ttm") else None
         pb = float(row["pb"]) if row is not None and row.get("pb") == row.get("pb") else None
-        history_frame = self._pro.daily_basic(ts_code=ts_code, start_date="20100101", end_date=latest_trade_date)
         history_rows = [
             {"trade_date": str(item.trade_date), "pe_ttm": None if item.pe_ttm != item.pe_ttm else float(item.pe_ttm), "pb": None if item.pb != item.pb else float(item.pb)}
             for item in history_frame.itertuples(index=False)

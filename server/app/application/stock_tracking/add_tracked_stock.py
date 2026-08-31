@@ -26,5 +26,8 @@ class AddTrackedStock:
             pb=snapshot.pb, pb_percentile=calculate_percentile(snapshot.pb, pb_values),
             valuation_history=snapshot.valuation_history, latest_trade_date=snapshot.latest_trade_date,
             data_source="tushare", last_synced_at=datetime.now(timezone.utc), sync_error=None,
+            history_start_date=snapshot.history_start_date,
+            history_end_date=snapshot.history_end_date,
+            history_count=snapshot.history_count,
         )
         return self._repository.save(detail)

@@ -22,6 +22,9 @@ class SqlAlchemyStockTrackingRepository:
             valuation_history=tuple(history), latest_trade_date=row["latestTradeDate"],
             data_source=row["dataSource"], last_synced_at=row["lastSyncedAt"],
             sync_error=row["syncError"],
+            history_start_date=row.get("historyStartDate"),
+            history_end_date=row.get("historyEndDate"),
+            history_count=int(row.get("historyCount") or 0),
         )
 
     def _find(self, ts_code: str) -> StockDetail | None:
@@ -54,6 +57,8 @@ class SqlAlchemyStockTrackingRepository:
             "history": json.dumps(detail.valuation_history, ensure_ascii=False),
             "latest_trade_date": detail.latest_trade_date, "data_source": detail.data_source,
             "last_synced_at": detail.last_synced_at, "sync_error": detail.sync_error,
+            "history_start_date": detail.history_start_date, "history_end_date": detail.history_end_date,
+            "history_count": detail.history_count,
         }
         if self._find(detail.ts_code):
             self._session.execute(text("""
@@ -61,17 +66,19 @@ class SqlAlchemyStockTrackingRepository:
                 currentPrice=:current_price, change7dPercent=:change_7d_percent, peTtm=:pe_ttm,
                 pePercentile=:pe_percentile, pb=:pb, pbPercentile=:pb_percentile,
                 valuationHistoryJson=:history, latestTradeDate=:latest_trade_date, dataSource=:data_source,
-                lastSyncedAt=:last_synced_at, syncError=:sync_error WHERE tsCode=:ts_code
+                lastSyncedAt=:last_synced_at, syncError=:sync_error, historyStartDate=:history_start_date,
+                historyEndDate=:history_end_date, historyCount=:history_count WHERE tsCode=:ts_code
             """), values)
         else:
             self._session.execute(text("""
                 INSERT INTO StockDetail
                 (tsCode, stockName, exchange, isTracked, currentPrice, change7dPercent, peTtm,
                  pePercentile, pb, pbPercentile, valuationHistoryJson, latestTradeDate, dataSource,
-                 lastSyncedAt, syncError)
+                 lastSyncedAt, syncError, historyStartDate, historyEndDate, historyCount)
                 VALUES (:ts_code, :stock_name, :exchange, :is_tracked, :current_price, :change_7d_percent,
                         :pe_ttm, :pe_percentile, :pb, :pb_percentile, :history, :latest_trade_date,
-                        :data_source, :last_synced_at, :sync_error)
+                        :data_source, :last_synced_at, :sync_error, :history_start_date, :history_end_date,
+                        :history_count)
             """), values)
         self._session.commit()
         return self._find(detail.ts_code)  # type: ignore[return-value]

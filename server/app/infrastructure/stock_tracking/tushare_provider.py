@@ -15,7 +15,7 @@ class TushareStockDataProvider(StockDataProvider):
         self._pro = tushare.pro_api(token)
 
     def fetch_snapshot(self, ts_code: str, history: tuple[dict[str, object], ...]) -> StockSnapshot:
-        basic = self._pro.stock_basic(ts_code=ts_code, fields="ts_code,name,exchange")
+        basic = self._pro.stock_basic(ts_code=ts_code, fields="ts_code,name,exchange,list_date")
         if basic.empty:
             raise LookupError("STOCK_NOT_FOUND")
         stock = basic.iloc[0]
@@ -27,7 +27,10 @@ class TushareStockDataProvider(StockDataProvider):
             raise LookupError("NO_RECENT_TRADE_DATE")
         trade_dates = sorted(calendar["cal_date"].astype(str).tolist())
         calendar_latest_date = trade_dates[-1]
-        history_frame = self._pro.daily_basic(ts_code=ts_code, start_date="20100101", end_date=calendar_latest_date)
+        list_date = str(stock["list_date"])
+        if not list_date or list_date.lower() == "nan":
+            raise LookupError("LIST_DATE_MISSING")
+        history_frame = self._fetch_valuation_history(list_date, calendar_latest_date, ts_code)
         if history_frame.empty:
             latest_trade_date = calendar_latest_date
         else:
@@ -50,4 +53,28 @@ class TushareStockDataProvider(StockDataProvider):
             ts_code=ts_code, stock_name=str(stock["name"]), exchange=str(stock["exchange"]),
             latest_trade_date=datetime.strptime(latest_trade_date, "%Y%m%d").date(), prices=prices,
             pe_ttm=pe_ttm, pb=pb, valuation_history=tuple(merged[key] for key in sorted(merged)),
+            history_start_date=datetime.strptime(list_date, "%Y%m%d").date(),
+            history_end_date=datetime.strptime(latest_trade_date, "%Y%m%d").date(),
+            history_count=len(merged),
         )
+
+    def _fetch_valuation_history(self, start_date: str, end_date: str, ts_code: str):
+        import pandas as pd
+
+        start = datetime.strptime(start_date, "%Y%m%d").date()
+        end = datetime.strptime(end_date, "%Y%m%d").date()
+        frames = []
+        cursor = start
+        while cursor <= end:
+            segment_end = min(cursor + timedelta(days=364), end)
+            frame = self._pro.daily_basic(
+                ts_code=ts_code,
+                start_date=cursor.strftime("%Y%m%d"),
+                end_date=segment_end.strftime("%Y%m%d"),
+            )
+            if not frame.empty:
+                frames.append(frame)
+            cursor = segment_end + timedelta(days=1)
+        if not frames:
+            return pd.DataFrame(columns=["trade_date", "pe_ttm", "pb"])
+        return pd.concat(frames, ignore_index=True).drop_duplicates(subset=["trade_date"]).sort_values("trade_date")

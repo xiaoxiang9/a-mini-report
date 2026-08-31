@@ -32,6 +32,9 @@ class StockResponse(BaseModel):
     dataSource: str | None
     lastSyncedAt: str | None
     syncError: str | None
+    historyStartDate: str | None
+    historyEndDate: str | None
+    historyCount: int
 
 
 def _response(detail: StockDetail) -> StockResponse:
@@ -45,6 +48,9 @@ def _response(detail: StockDetail) -> StockResponse:
         dataSource=detail.data_source,
         lastSyncedAt=detail.last_synced_at.isoformat() if detail.last_synced_at else None,
         syncError=detail.sync_error,
+        historyStartDate=detail.history_start_date.isoformat() if detail.history_start_date else None,
+        historyEndDate=detail.history_end_date.isoformat() if detail.history_end_date else None,
+        historyCount=detail.history_count,
     )
 
 

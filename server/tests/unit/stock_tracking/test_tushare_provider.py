@@ -7,7 +7,7 @@ from app.infrastructure.stock_tracking.tushare_provider import TushareStockDataP
 
 class FakePro:
     def stock_basic(self, **kwargs):
-        return pd.DataFrame([{"ts_code": "600519.SH", "name": "贵州茅台", "exchange": "SSE"}])
+        return pd.DataFrame([{"ts_code": "600519.SH", "name": "贵州茅台", "exchange": "SSE", "list_date": "20200101"}])
 
     def trade_cal(self, **kwargs):
         return pd.DataFrame([{"cal_date": "20260828"}, {"cal_date": "20260831"}])
@@ -37,3 +37,5 @@ def test_provider_uses_latest_available_valuation_date() -> None:
     assert snapshot.pe_ttm == 19.9162
     assert snapshot.pb == 6.4551
     assert snapshot.prices == (1290.0,)
+    assert snapshot.history_start_date == date(2020, 1, 1)
+    assert snapshot.history_count == 2

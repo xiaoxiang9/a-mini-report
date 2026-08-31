@@ -15,7 +15,8 @@ def test_repository_saves_and_lists_only_tracked_stocks() -> None:
                 tsCode TEXT PRIMARY KEY, stockName TEXT, exchange TEXT, isTracked BOOLEAN,
                 currentPrice FLOAT, change7dPercent FLOAT, peTtm FLOAT, pePercentile FLOAT,
                 pb FLOAT, pbPercentile FLOAT, valuationHistoryJson TEXT, latestTradeDate DATE,
-                dataSource TEXT, lastSyncedAt DATETIME, syncError TEXT
+                dataSource TEXT, lastSyncedAt DATETIME, syncError TEXT,
+                historyStartDate DATE, historyEndDate DATE, historyCount INTEGER
             )
         """))
 

@@ -13,6 +13,9 @@ class StockSnapshot:
     pe_ttm: float | None
     pb: float | None
     valuation_history: tuple[dict[str, object], ...]
+    history_start_date: date | None = None
+    history_end_date: date | None = None
+    history_count: int = 0
 
 
 class StockDataProvider(Protocol):

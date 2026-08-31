@@ -1,0 +1,1 @@
+"""Global scheduled-task domain."""

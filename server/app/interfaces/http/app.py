@@ -20,6 +20,9 @@ from app.domain.stock_tracking.repositories import StockTrackingRepository
 from app.interfaces.http.routes.health import build_health_router
 from app.interfaces.http.routes.home import build_home_router
 from app.interfaces.http.routes.stocks import build_stocks_router
+from app.interfaces.http.routes.tasks import build_tasks_router
+from app.application.task.service import TaskManagementService, TaskRuntimeService
+from app.infrastructure.task.sqlalchemy_repository import SqlAlchemyTaskRepository
 
 
 def create_app(
@@ -37,8 +40,8 @@ def create_app(
             "https://myxiang.online",
             "https://www.myxiang.online",
         ],
-        allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
-        allow_headers=["Content-Type"],
+        allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "X-Task-Admin-Token"],
     )
     if home_use_case is None:
         session = SessionFactory()
@@ -71,4 +74,10 @@ def create_app(
         AddTrackedStock(stock_repository, stock_provider), RemoveTrackedStock(stock_repository),
         SyncTrackedStocks(stock_repository, stock_provider),
     ), prefix="/api")
+    task_repository = SqlAlchemyTaskRepository(SessionFactory())
+    task_management = TaskManagementService(task_repository)
+    task_runtime = TaskRuntimeService(task_repository, {
+        "stock_sync": SyncTrackedStocks(stock_repository, stock_provider).execute,
+    })
+    app.include_router(build_tasks_router(task_management, task_runtime, get_settings().task_admin_token), prefix="/api")
     return app

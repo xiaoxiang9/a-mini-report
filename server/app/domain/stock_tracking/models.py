@@ -19,3 +19,6 @@ class StockDetail:
     data_source: str | None
     last_synced_at: datetime | None
     sync_error: str | None
+    history_start_date: date | None = None
+    history_end_date: date | None = None
+    history_count: int = 0

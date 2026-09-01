@@ -25,3 +25,22 @@
 .tracking-table .stock-name-link { display: inline-flex; min-height: 48px; flex-direction: column; align-items: center; justify-content: center; gap: 5px; text-decoration: none; }
 .tracking-table .stock-name-primary { color: var(--cream); font-size: 16px; font-weight: 700; line-height: 1.2; }
 .tracking-table .stock-name-secondary { color: var(--muted); font: 11px 'DM Mono', monospace; line-height: 1.2; }
+.ant-app-shell { min-height: 100vh; }
+.ant-app-shell .sidebar { position: fixed; z-index: 20; height: 100vh; padding: 38px 0 28px; background: rgba(8,16,18,.96); }
+.ant-app-shell .sidebar .brand { padding: 0 24px; }
+.ant-app-shell .sidebar-section-label { display: block; margin: 78px 24px 16px; }
+.ant-app-shell .sidebar .ant-menu { background: transparent; border-inline-end: 0; }
+.ant-app-shell .sidebar .ant-menu-item { margin-inline: 12px; width: calc(100% - 24px); }
+.ant-app-shell .main-content { width: auto; min-height: 100vh; margin-left: 250px; }
+.ant-app-shell .topbar { height: auto; padding: 34px 64px 0; line-height: normal; background: transparent; }
+.ant-app-shell .sidebar-footer { margin: auto 24px 0; padding: 17px 0 0; }
+.ant-app-shell .brand-subtitle { display: block; font: 9px 'DM Mono', monospace; letter-spacing: 1.5px; }
+.ant-app-shell .topbar-separator { margin: 0 7px; color: #3d5552; }
+.ant-app-shell .ant-layout-content { background: transparent; }
+.ant-app-shell .ant-typography { color: var(--cream); }
+.ant-app-shell .ant-typography-secondary { color: var(--muted); }
+.ant-app-shell .ant-card, .ant-app-shell .ant-table-wrapper { background: rgba(16,29,32,.86); }
+.ant-app-shell .ant-table { background: transparent; }
+.ant-app-shell .ant-table-thead > tr > th { text-align: center; }
+.ant-app-shell .empty-module { display: block; }
+.ant-app-shell .empty-module .ant-empty { margin: 12px 0 20px; }

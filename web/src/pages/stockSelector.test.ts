@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getAddActionState, selectionToAddCode } from './stockSelector';
+import { getAddActionState, getSearchResultAction, selectionToAddCode } from './stockSelector';
 
 describe('stock selector', () => {
   it('does not produce an add code before a suggestion is selected', () => {
@@ -12,5 +12,9 @@ describe('stock selector', () => {
 
   it('disables the add action and shows progress while adding', () => {
     expect(getAddActionState({ tsCode: '600519.SH' }, true)).toEqual({ disabled: true, label: '添加中…' });
+  });
+
+  it('shows added state for tracked search results', () => {
+    expect(getSearchResultAction(true, false)).toEqual({ disabled: true, label: '已添加' });
   });
 });

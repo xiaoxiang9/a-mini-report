@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { addTrackedStock, fetchStockDetail, fetchTrackedStocks, removeTrackedStock, searchStocks, StockDetail, StockSearchResult } from '../api/stocks';
-import { getAddActionState, selectionToAddCode } from './stockSelector';
+import { getSearchResultAction } from './stockSelector';
 
 function Metric({ label, value }: { label: string; value: number | null }) {
   return <div className="stock-metric"><span>{label}</span><strong>{value == null ? '—' : value.toFixed(2)}</strong></div>;
@@ -9,27 +9,22 @@ function Metric({ label, value }: { label: string; value: number | null }) {
 
 export function StockTrackingPage() {
   const [stocks, setStocks] = useState<StockDetail[]>([]);
-  const [code, setCode] = useState('');
-  const [selectedStock, setSelectedStock] = useState<StockSearchResult | null>(null);
-  const [isAdding, setIsAdding] = useState(false);
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<StockSearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [addingCode, setAddingCode] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [suggestions, setSuggestions] = useState<StockSearchResult[]>([]);
   const [loading, setLoading] = useState(true);
   const load = () => fetchTrackedStocks().then(setStocks).catch(() => setMessage('列表加载失败，请检查 API 服务')).finally(() => setLoading(false));
   useEffect(() => { void load(); }, []);
-  useEffect(() => { const keyword = code.trim(); if (!keyword || selectedStock) { setSuggestions([]); return; } const timer = window.setTimeout(() => { searchStocks(keyword).then(setSuggestions).catch(() => setSuggestions([])); }, 300); return () => window.clearTimeout(timer); }, [code, selectedStock]);
-  const submit = async (event: FormEvent) => {
-    event.preventDefault(); setMessage('');
-    const tsCode = selectionToAddCode(selectedStock);
-    if (!tsCode) { setMessage('请先选择搜索结果'); return; }
-    setIsAdding(true);
-    try { await addTrackedStock(tsCode); setCode(''); setSelectedStock(null); setSuggestions([]); setMessage('股票已添加，正在刷新列表…'); await load(); } catch (error) { setMessage(error instanceof Error && error.message.includes('503') ? 'Tushare 暂不可用，请稍后重试' : '添加股票失败，请稍后重试'); } finally { setIsAdding(false); }
-  };
-  const handleInputChange = (value: string) => { setCode(value); setSelectedStock(null); setMessage(''); };
-  const selectSuggestion = (item: StockSearchResult) => { if (item.isTracked) { setMessage('该股票已在追踪列表中'); return; } setSelectedStock(item); setCode(`${item.stockName} · ${item.tsCode}`); setSuggestions([]); setMessage(''); };
+  const search = async (event: FormEvent) => { event.preventDefault(); const keyword = query.trim(); if (!keyword) { setMessage('请输入股票名称或代码'); setResults([]); return; } setIsSearching(true); setMessage(''); try { setResults(await searchStocks(keyword)); } catch { setResults([]); setMessage('搜索失败，请稍后重试'); } finally { setIsSearching(false); } };
+  const openAdd = () => { setIsAddOpen(true); setQuery(''); setResults([]); setMessage(''); };
+  const closeAdd = () => { if (addingCode) return; setIsAddOpen(false); };
+  const addFromResult = async (item: StockSearchResult) => { if (item.isTracked || addingCode) return; setAddingCode(item.tsCode); setMessage(''); try { await addTrackedStock(item.tsCode); setMessage(`${item.stockName} 已添加`); setResults((current) => current.map((result) => result.tsCode === item.tsCode ? { ...result, isTracked: true } : result)); await load(); } catch (error) { setMessage(error instanceof Error && error.message.includes('503') ? 'Tushare 暂不可用，请稍后重试' : '添加股票失败，请稍后重试'); } finally { setAddingCode(null); } };
   const remove = async (tsCode: string) => { if (!window.confirm(`确认移除 ${tsCode}？`)) return; await removeTrackedStock(tsCode); await load(); };
-  const addAction = getAddActionState(selectedStock, isAdding);
-  return <div className="module-page page-wrap"><p className="overline">STOCK TRACKING</p><h1>个股追踪</h1><p className="module-intro">持续跟踪关注标的，所有指标标注最新交易日。</p><form className="stock-add-form" onSubmit={submit}><div className="stock-search-box"><input value={code} disabled={isAdding} onChange={(event) => handleInputChange(event.target.value)} placeholder="输入中文名称或股票代码，如 贵州茅台 / 600519" />{suggestions.length > 0 && !isAdding && <div className="stock-suggestions">{suggestions.map((item) => <button type="button" key={item.tsCode} onClick={() => selectSuggestion(item)}><span><strong>{item.stockName}</strong><small>{item.tsCode} · {item.exchange}</small></span><em>{item.isTracked ? '已追踪' : '选择'}</em></button>)}</div>}</div><button type="submit" disabled={addAction.disabled}>{addAction.label}</button></form>{message && <div className="notice">{message}</div>}{loading ? <div className="loading-bar">正在加载追踪列表…</div> : stocks.length === 0 ? <div className="empty-module"><span className="empty-icon">◌</span><strong>还没有追踪股票</strong><span>添加一只股票，开始建立自己的观察清单。</span></div> : <div className="stock-list">{stocks.map((stock) => <article className="stock-row" key={stock.tsCode}><Link to={`/stock-tracking/${stock.tsCode}`}><div className="stock-name"><strong>{stock.stockName}</strong><span>{stock.tsCode}</span></div><Metric label="现价" value={stock.currentPrice} /><Metric label="7日涨幅" value={stock.change7dPercent} /><Metric label="PE" value={stock.peTtm} /><Metric label="PE历史百分位" value={stock.pePercentile} /><Metric label="PB" value={stock.pb} /><Metric label="PB历史百分位" value={stock.pbPercentile} /></Link><button className="text-button" onClick={() => void remove(stock.tsCode)}>移除</button></article>)}</div>}</div>;
+  return <div className="module-page page-wrap"><div className="module-heading"><div><p className="overline">STOCK TRACKING</p><h1>个股追踪</h1><p className="module-intro">持续跟踪关注标的，所有指标标注最新交易日。</p></div><button className="primary-button" onClick={openAdd}>新增</button></div>{message && <div className="notice">{message}</div>}{loading ? <div className="loading-bar">正在加载追踪列表…</div> : stocks.length === 0 ? <div className="empty-module"><span className="empty-icon">◌</span><strong>还没有追踪股票</strong><span>点击右上角“新增”，开始建立自己的观察清单。</span></div> : <div className="stock-list">{stocks.map((stock) => <article className="stock-row" key={stock.tsCode}><Link to={`/stock-tracking/${stock.tsCode}`}><div className="stock-name"><strong>{stock.stockName}</strong><span>{stock.tsCode}</span></div><Metric label="现价" value={stock.currentPrice} /><Metric label="7日涨幅" value={stock.change7dPercent} /><Metric label="PE" value={stock.peTtm} /><Metric label="PE历史百分位" value={stock.pePercentile} /><Metric label="PB" value={stock.pb} /><Metric label="PB历史百分位" value={stock.pbPercentile} /></Link><button className="text-button" onClick={() => void remove(stock.tsCode)}>移除</button></article>)}</div>}{isAddOpen && <div className="modal-backdrop" onClick={closeAdd}><section className="stock-modal" role="dialog" aria-modal="true" aria-labelledby="stock-modal-title" onClick={(event) => event.stopPropagation()}><div className="modal-header"><div><p className="overline">ADD STOCK</p><h2 id="stock-modal-title">新增追踪股票</h2></div><button className="modal-close" onClick={closeAdd} disabled={Boolean(addingCode)}>×</button></div><form className="modal-search" onSubmit={search}><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索股票名称或代码，如 贵州茅台 / 600519" autoFocus /><button type="submit" disabled={isSearching}>{isSearching ? '搜索中…' : '搜索'}</button></form>{isSearching ? <div className="modal-loading">正在搜索股票…</div> : results.length > 0 ? <div className="search-result-table"><div className="result-row result-head"><span>股票</span><span>代码</span><span>交易所</span><span>操作</span></div>{results.map((item) => { const action = getSearchResultAction(item.isTracked, addingCode === item.tsCode); return <div className="result-row" key={item.tsCode}><span><strong>{item.stockName}</strong></span><span>{item.tsCode}</span><span>{item.exchange}</span><button className="result-action" disabled={action.disabled} onClick={() => void addFromResult(item)}>{action.label}</button></div>; })}</div> : query.trim() ? <div className="modal-empty">暂无匹配股票</div> : <div className="modal-empty">输入股票名称或代码后点击搜索</div>}</section></div>}</div>;
 }
 
 export function StockDetailPage() {

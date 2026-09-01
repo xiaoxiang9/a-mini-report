@@ -75,13 +75,13 @@ def create_app(
                     raise provider_error
 
             stock_provider = UnavailableStockProvider()
+    app.include_router(build_table_config_router(SqlAlchemyStockTableConfigRepository(SessionFactory())), prefix="/api")
     app.include_router(build_stocks_router(
         ListTrackedStocks(stock_repository), GetStockDetail(stock_repository),
         AddTrackedStock(stock_repository, stock_provider), RemoveTrackedStock(stock_repository),
         SyncTrackedStocks(stock_repository, stock_provider),
         SearchStocks(stock_provider, stock_repository),
     ), prefix="/api")
-    app.include_router(build_table_config_router(SqlAlchemyStockTableConfigRepository(SessionFactory())), prefix="/api")
     task_repository = SqlAlchemyTaskRepository(SessionFactory())
     task_management = TaskManagementService(task_repository)
     task_runtime = TaskRuntimeService(task_repository, {

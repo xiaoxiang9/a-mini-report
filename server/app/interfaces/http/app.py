@@ -10,6 +10,7 @@ from app.infrastructure.config.settings import get_settings
 from app.infrastructure.platform.sqlalchemy_repository import SqlAlchemyHomeSummaryRepository
 from app.infrastructure.stock_tracking.sqlalchemy_repository import SqlAlchemyStockTrackingRepository
 from app.infrastructure.stock_tracking.tushare_provider import TushareStockDataProvider
+from app.infrastructure.stock_tracking.table_config_repository import SqlAlchemyStockTableConfigRepository
 from app.application.stock_tracking.add_tracked_stock import AddTrackedStock
 from app.application.stock_tracking.get_stock_detail import GetStockDetail
 from app.application.stock_tracking.list_tracked_stocks import ListTrackedStocks
@@ -22,6 +23,7 @@ from app.interfaces.http.routes.health import build_health_router
 from app.interfaces.http.routes.home import build_home_router
 from app.interfaces.http.routes.stocks import build_stocks_router
 from app.interfaces.http.routes.tasks import build_tasks_router
+from app.interfaces.http.routes.table_config import build_table_config_router
 from app.application.task.service import TaskManagementService, TaskRuntimeService
 from app.infrastructure.task.sqlalchemy_repository import SqlAlchemyTaskRepository
 
@@ -79,6 +81,7 @@ def create_app(
         SyncTrackedStocks(stock_repository, stock_provider),
         SearchStocks(stock_provider, stock_repository),
     ), prefix="/api")
+    app.include_router(build_table_config_router(SqlAlchemyStockTableConfigRepository(SessionFactory())), prefix="/api")
     task_repository = SqlAlchemyTaskRepository(SessionFactory())
     task_management = TaskManagementService(task_repository)
     task_runtime = TaskRuntimeService(task_repository, {

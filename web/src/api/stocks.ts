@@ -16,6 +16,7 @@ export interface StockDetail {
   syncError: string | null;
 }
 export interface StockSearchResult { tsCode: string; stockName: string; exchange: string; isTracked: boolean; }
+export interface TableColumn { key: string; visible: boolean; frozen: boolean; searchable: boolean; searchType: 'text' | 'number' | 'enum' | 'none'; order: number; }
 
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '');
 
@@ -50,3 +51,6 @@ export function searchStocks(query: string): Promise<StockSearchResult[]> {
 export function removeTrackedStock(tsCode: string): Promise<StockDetail> {
   return request<StockDetail>(`/api/stocks/${encodeURIComponent(tsCode)}`, { method: 'DELETE' });
 }
+
+export function fetchStockTableConfig(): Promise<TableColumn[]> { return request<TableColumn[]>('/api/stocks/table-config'); }
+export function saveStockTableConfig(columns: TableColumn[]): Promise<TableColumn[]> { return request<TableColumn[]>('/api/stocks/table-config', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(columns) }); }

@@ -12,6 +12,9 @@ export function getSearchResultAction(isTracked: boolean, isAdding: boolean) {
 
 export function formatStockError(error: unknown): string {
   const message = error instanceof Error ? error.message : '';
+  if (message.includes('FROZEN_COLUMNS_NOT_CONTIGUOUS')) return '冻结列必须从左侧连续设置，请先取消断档列后再保存';
+  if (message.includes('IDENTITY_COLUMN_REQUIRED')) return '至少保留股票名称或股票代码列';
+  if (message.includes('TABLE_COLUMNS_EMPTY')) return '至少保留一个表格字段';
   if (message.includes('404') || message.includes('STOCK_NOT_FOUND')) return '未找到这支股票，请检查名称或代码';
   if (message.includes('422') || message.includes('INVALID_TS_CODE')) return '股票代码格式不正确，请重新搜索并选择结果';
   if (message.includes('503') || message.includes('TUSHARE_')) return '行情数据源暂不可用，请检查 Tushare 配置';

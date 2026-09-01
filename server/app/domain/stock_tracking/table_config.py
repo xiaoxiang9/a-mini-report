@@ -40,7 +40,9 @@ def validate_columns(columns: list[TableColumn]) -> tuple[TableColumn, ...]:
         raise ValueError("IDENTITY_COLUMN_REQUIRED")
     frozen_seen_gap = False
     for item in normalized[:-1]:
-        if not item.visible or not item.frozen:
+        if not item.visible:
+            continue
+        if not item.frozen:
             frozen_seen_gap = True
         elif frozen_seen_gap:
             raise ValueError("FROZEN_COLUMNS_NOT_CONTIGUOUS")

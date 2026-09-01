@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from typing import Callable
 
 from app.domain.task.models import ScheduledTask, TaskExecutionLog
+from app.infrastructure.common.converters import safe_int
 from app.domain.task.repositories import TaskRepository
 
 
@@ -49,9 +50,9 @@ class TaskRuntimeService:
             finished_at = datetime.now(timezone.utc)
             summary = str(result.get("summary") or self._summary(result))
             values = {
-                "finished_at": finished_at, "duration_ms": max(0, int((finished_at - started_at).total_seconds() * 1000)),
+                "finished_at": finished_at, "duration_ms": max(0, safe_int((finished_at - started_at).total_seconds() * 1000) or 0),
                 "status": "success" if not result.get("failure_count") else "failed",
-                "success_count": int(result.get("success_count", 0)), "failure_count": int(result.get("failure_count", 0)),
+                "success_count": safe_int(result.get("success_count", 0)) or 0, "failure_count": safe_int(result.get("failure_count", 0)) or 0,
                 "summary": summary,
             }
             self.repository.finish_log(log.id, **values)
@@ -62,7 +63,7 @@ class TaskRuntimeService:
             finished_at = datetime.now(timezone.utc)
             message = str(error)[:1024] or error.__class__.__name__
             self.repository.finish_log(log.id, finished_at=finished_at,
-                                       duration_ms=max(0, int((finished_at - started_at).total_seconds() * 1000)),
+                                       duration_ms=max(0, safe_int((finished_at - started_at).total_seconds() * 1000) or 0),
                                        status="failed", summary="任务执行失败", error_detail=message)
             task.last_run_at, task.last_status, task.last_summary, task.last_error = finished_at, "failed", "任务执行失败", message
             self.repository.save_task(task)

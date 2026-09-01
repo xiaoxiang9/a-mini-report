@@ -27,6 +27,11 @@ class FakePro:
         ])
 
 
+class MissingValuationPro(FakePro):
+    def daily_basic(self, **kwargs):
+        return pd.DataFrame([{"trade_date": "20260828", "pe_ttm": None, "pb": None}])
+
+
 def test_provider_uses_latest_available_valuation_date() -> None:
     provider = object.__new__(TushareStockDataProvider)
     provider._pro = FakePro()
@@ -46,3 +51,15 @@ def test_provider_searches_stock_code_or_name() -> None:
     provider._pro = FakePro()
     results = provider.search_stocks("贵州")
     assert results[0].ts_code == "600519.SH"
+
+
+def test_provider_treats_missing_valuation_values_as_empty() -> None:
+    provider = object.__new__(TushareStockDataProvider)
+    provider._pro = MissingValuationPro()
+
+    snapshot = provider.fetch_snapshot("600519.SH", tuple())
+
+    assert snapshot.pe_ttm is None
+    assert snapshot.pb is None
+    assert snapshot.valuation_history[0]["pe_ttm"] is None
+    assert snapshot.valuation_history[0]["pb"] is None

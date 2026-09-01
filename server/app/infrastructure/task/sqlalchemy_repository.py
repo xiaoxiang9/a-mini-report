@@ -4,6 +4,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.domain.task.models import ScheduledTask, TaskExecutionLog
+from app.infrastructure.common.converters import safe_int
 
 
 class SqlAlchemyTaskRepository:
@@ -14,7 +15,7 @@ class SqlAlchemyTaskRepository:
     def _task(row: dict) -> ScheduledTask:
         return ScheduledTask(
             task_key=row["taskKey"], task_name=row["taskName"], task_type=row["taskType"], enabled=bool(row["enabled"]),
-            schedule_hour=int(row["scheduleHour"]), schedule_minute=int(row["scheduleMinute"]), timezone=row["timezone"],
+            schedule_hour=safe_int(row["scheduleHour"]) or 0, schedule_minute=safe_int(row["scheduleMinute"]) or 0, timezone=row["timezone"],
             next_run_at=row["nextRunAt"], last_run_at=row["lastRunAt"], last_status=row["lastStatus"],
             last_summary=row["lastSummary"], last_error=row["lastError"],
         )
@@ -22,9 +23,9 @@ class SqlAlchemyTaskRepository:
     @staticmethod
     def _log(row: dict) -> TaskExecutionLog:
         return TaskExecutionLog(
-            id=int(row["id"]), task_key=row["taskKey"], started_at=row["startedAt"], finished_at=row["finishedAt"],
-            duration_ms=row["durationMs"], status=row["status"], success_count=int(row["successCount"] or 0),
-            failure_count=int(row["failureCount"] or 0), summary=row["summary"], error_detail=row["errorDetail"],
+            id=safe_int(row["id"]) or 0, task_key=row["taskKey"], started_at=row["startedAt"], finished_at=row["finishedAt"],
+            duration_ms=row["durationMs"], status=row["status"], success_count=safe_int(row["successCount"]) or 0,
+            failure_count=safe_int(row["failureCount"]) or 0, summary=row["summary"], error_detail=row["errorDetail"],
         )
 
     def list_tasks(self) -> list[ScheduledTask]:
@@ -55,7 +56,7 @@ class SqlAlchemyTaskRepository:
         """), {"task_key": log.task_key, "started_at": log.started_at, "status": log.status,
                 "success_count": log.success_count, "failure_count": log.failure_count})
         self.session.commit()
-        log.id = int(result.lastrowid)
+        log.id = safe_int(result.lastrowid) or 0
         return log
 
     def finish_log(self, log_id: int, **values: object) -> TaskExecutionLog:

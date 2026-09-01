@@ -5,6 +5,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.domain.stock_tracking.models import StockDetail
+from app.infrastructure.common.converters import safe_int
 
 
 class SqlAlchemyStockTrackingRepository:
@@ -24,7 +25,7 @@ class SqlAlchemyStockTrackingRepository:
             sync_error=row["syncError"],
             history_start_date=row.get("historyStartDate"),
             history_end_date=row.get("historyEndDate"),
-            history_count=int(row.get("historyCount") or 0),
+            history_count=safe_int(row.get("historyCount")) or 0,
         )
 
     def _find(self, ts_code: str) -> StockDetail | None:

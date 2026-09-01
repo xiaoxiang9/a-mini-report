@@ -1,6 +1,7 @@
 from datetime import date, datetime, timedelta
 
 from app.domain.stock_tracking.providers import StockDataProvider, StockSearchResult, StockSnapshot
+from app.infrastructure.common.converters import safe_float
 
 
 class TushareStockDataProvider(StockDataProvider):
@@ -39,12 +40,12 @@ class TushareStockDataProvider(StockDataProvider):
         daily = self._pro.daily(ts_code=ts_code, start_date=start, end_date=calendar_latest_date)
         daily = daily.sort_values("trade_date")
         daily = daily[daily["trade_date"].astype(str) <= latest_trade_date]
-        prices = tuple(float(value) for value in daily.tail(7)["close"].tolist())
+        prices = tuple(value for value in (safe_float(item) for item in daily.tail(7)["close"].tolist()) if value is not None)
         row = history_frame[history_frame["trade_date"].astype(str) == latest_trade_date].iloc[0] if not history_frame.empty else None
-        pe_ttm = float(row["pe_ttm"]) if row is not None and row.get("pe_ttm") == row.get("pe_ttm") else None
-        pb = float(row["pb"]) if row is not None and row.get("pb") == row.get("pb") else None
+        pe_ttm = safe_float(row.get("pe_ttm")) if row is not None else None
+        pb = safe_float(row.get("pb")) if row is not None else None
         history_rows = [
-            {"trade_date": str(item.trade_date), "pe_ttm": None if item.pe_ttm != item.pe_ttm else float(item.pe_ttm), "pb": None if item.pb != item.pb else float(item.pb)}
+            {"trade_date": str(item.trade_date), "pe_ttm": safe_float(item.pe_ttm), "pb": safe_float(item.pb)}
             for item in history_frame.itertuples(index=False)
         ]
         merged = {str(item["trade_date"]): item for item in history}

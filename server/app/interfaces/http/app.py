@@ -15,6 +15,7 @@ from app.application.stock_tracking.get_stock_detail import GetStockDetail
 from app.application.stock_tracking.list_tracked_stocks import ListTrackedStocks
 from app.application.stock_tracking.remove_tracked_stock import RemoveTrackedStock
 from app.application.stock_tracking.sync_tracked_stocks import SyncTrackedStocks
+from app.application.stock_tracking.search_stocks import SearchStocks
 from app.domain.stock_tracking.providers import StockDataProvider
 from app.domain.stock_tracking.repositories import StockTrackingRepository
 from app.interfaces.http.routes.health import build_health_router
@@ -68,11 +69,15 @@ def create_app(
                 def fetch_snapshot(self, ts_code: str, history: tuple[dict[str, object], ...]):
                     raise provider_error
 
+                def search_stocks(self, query: str):
+                    raise provider_error
+
             stock_provider = UnavailableStockProvider()
     app.include_router(build_stocks_router(
         ListTrackedStocks(stock_repository), GetStockDetail(stock_repository),
         AddTrackedStock(stock_repository, stock_provider), RemoveTrackedStock(stock_repository),
         SyncTrackedStocks(stock_repository, stock_provider),
+        SearchStocks(stock_provider, stock_repository),
     ), prefix="/api")
     task_repository = SqlAlchemyTaskRepository(SessionFactory())
     task_management = TaskManagementService(task_repository)

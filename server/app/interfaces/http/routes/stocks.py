@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Path
+from fastapi import APIRouter, HTTPException, Path, Query
 from pydantic import AliasChoices, BaseModel, Field
 
 from app.application.stock_tracking.add_tracked_stock import AddTrackedStock
@@ -9,6 +9,7 @@ from app.application.stock_tracking.get_stock_detail import GetStockDetail
 from app.application.stock_tracking.list_tracked_stocks import ListTrackedStocks
 from app.application.stock_tracking.remove_tracked_stock import RemoveTrackedStock
 from app.application.stock_tracking.sync_tracked_stocks import SyncTrackedStocks
+from app.application.stock_tracking.search_stocks import SearchStocks
 from app.domain.stock_tracking.models import StockDetail
 
 
@@ -37,6 +38,13 @@ class StockResponse(BaseModel):
     historyCount: int
 
 
+class StockSearchResponse(BaseModel):
+    tsCode: str
+    stockName: str
+    exchange: str
+    isTracked: bool
+
+
 def _response(detail: StockDetail) -> StockResponse:
     return StockResponse(
         tsCode=detail.ts_code, stockName=detail.stock_name, exchange=detail.exchange,
@@ -60,12 +68,20 @@ def build_stocks_router(
     add_use_case: AddTrackedStock,
     remove_use_case: RemoveTrackedStock,
     sync_use_case: SyncTrackedStocks,
+    search_use_case: SearchStocks,
 ) -> APIRouter:
     router = APIRouter()
 
     @router.get("/stocks/tracking", response_model=list[StockResponse])
     def list_stocks() -> list[StockResponse]:
         return [_response(item) for item in list_use_case.execute()]
+
+    @router.get("/stocks/search", response_model=list[StockSearchResponse])
+    def search_stocks(q: str = Query(min_length=1, max_length=32)) -> list[StockSearchResponse]:
+        try:
+            return [StockSearchResponse(**item) for item in search_use_case.execute(q)]
+        except RuntimeError as error:
+            raise HTTPException(status_code=503, detail=str(error)) from error
 
     @router.get("/stocks/{ts_code}", response_model=StockResponse)
     def get_stock(ts_code: Annotated[str, Path(min_length=6, max_length=10)]) -> StockResponse:

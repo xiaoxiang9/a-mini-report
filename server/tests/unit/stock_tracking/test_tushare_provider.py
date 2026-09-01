@@ -39,3 +39,10 @@ def test_provider_uses_latest_available_valuation_date() -> None:
     assert snapshot.prices == (1290.0,)
     assert snapshot.history_start_date == date(2020, 1, 1)
     assert snapshot.history_count == 2
+
+
+def test_provider_searches_stock_code_or_name() -> None:
+    provider = TushareStockDataProvider.__new__(TushareStockDataProvider)
+    provider._pro = FakePro()
+    results = provider.search_stocks("贵州")
+    assert results[0].ts_code == "600519.SH"

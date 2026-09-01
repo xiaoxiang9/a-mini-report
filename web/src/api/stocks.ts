@@ -15,6 +15,7 @@ export interface StockDetail {
   lastSyncedAt: string | null;
   syncError: string | null;
 }
+export interface StockSearchResult { tsCode: string; stockName: string; exchange: string; isTracked: boolean; }
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:3000';
 
@@ -36,6 +37,10 @@ export function addTrackedStock(tsCode: string): Promise<StockDetail> {
   return request<StockDetail>('/api/stocks/tracking', {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tsCode }),
   });
+}
+
+export function searchStocks(query: string): Promise<StockSearchResult[]> {
+  return request<StockSearchResult[]>(`/api/stocks/search?q=${encodeURIComponent(query)}`);
 }
 
 export function removeTrackedStock(tsCode: string): Promise<StockDetail> {

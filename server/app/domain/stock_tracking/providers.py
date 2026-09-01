@@ -18,5 +18,13 @@ class StockSnapshot:
     history_count: int = 0
 
 
+@dataclass(frozen=True)
+class StockSearchResult:
+    ts_code: str
+    stock_name: str
+    exchange: str
+
+
 class StockDataProvider(Protocol):
     def fetch_snapshot(self, ts_code: str, history: tuple[dict[str, object], ...]) -> StockSnapshot: ...
+    def search_stocks(self, query: str) -> tuple[StockSearchResult, ...]: ...

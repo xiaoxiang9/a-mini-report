@@ -1,6 +1,6 @@
 from datetime import date, datetime, timedelta
 
-from app.domain.stock_tracking.providers import StockDataProvider, StockSnapshot
+from app.domain.stock_tracking.providers import StockDataProvider, StockSearchResult, StockSnapshot
 
 
 class TushareStockDataProvider(StockDataProvider):
@@ -57,6 +57,18 @@ class TushareStockDataProvider(StockDataProvider):
             history_end_date=datetime.strptime(latest_trade_date, "%Y%m%d").date(),
             history_count=len(merged),
         )
+
+    def search_stocks(self, query: str) -> tuple[StockSearchResult, ...]:
+        keyword = query.strip().upper()
+        basic = self._pro.stock_basic(list_status="L", fields="ts_code,name,exchange")
+        if basic.empty:
+            return tuple()
+        matches = basic[
+            basic["ts_code"].astype(str).str.upper().str.contains(keyword, regex=False)
+            | basic["name"].astype(str).str.contains(query.strip(), regex=False)
+        ].head(20)
+        return tuple(StockSearchResult(str(row["ts_code"]), str(row["name"]), str(row["exchange"]))
+                     for row in matches.to_dict("records"))
 
     def _fetch_valuation_history(self, start_date: str, end_date: str, ts_code: str):
         import pandas as pd

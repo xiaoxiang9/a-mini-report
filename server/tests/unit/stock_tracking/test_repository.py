@@ -1,5 +1,6 @@
 import json
 
+
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 
@@ -35,3 +36,22 @@ def test_repository_saves_and_lists_only_tracked_stocks() -> None:
 
     assert [item.ts_code for item in tracked] == ["600519.SH"]
     assert json.loads(json.dumps(tracked[0].valuation_history))[0]["pe_ttm"] == 30
+
+
+def test_list_tracked_codes_recovers_a_session_with_a_failed_transaction() -> None:
+    class SessionWithPendingRollback:
+        def __init__(self) -> None:
+            self.rolled_back = False
+
+        def rollback(self) -> None:
+            self.rolled_back = True
+
+        def execute(self, _query):
+            if not self.rolled_back:
+                raise RuntimeError("pending rollback")
+            return [("600519.SH",)]
+
+    session = SessionWithPendingRollback()
+    repository = SqlAlchemyStockTrackingRepository(session)  # type: ignore[arg-type]
+
+    assert repository.list_tracked_codes() == ["600519.SH"]

@@ -43,6 +43,9 @@ class SqlAlchemyStockTrackingRepository:
         return self._find(ts_code)
 
     def list_tracked_codes(self) -> list[str]:
+        # Search can be called after a failed provider/database operation on the
+        # long-lived application session. Clear that transaction before reading.
+        self._session.rollback()
         rows = self._session.execute(
             text("SELECT tsCode FROM StockDetail WHERE isTracked = TRUE ORDER BY tsCode ASC")
         )

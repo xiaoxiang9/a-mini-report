@@ -38,6 +38,9 @@ a { color: inherit; text-decoration: none; }
 .task-card .ant-card-body { padding: 20px; }
 .task-card .ant-typography { margin-bottom: 4px; }
 .tracking-table-wrap { margin-top: 16px; }
+.table-filter-bar { display: flex; align-items: flex-start; gap: 8px; }
+.table-filter-fields { display: flex; flex: 1; flex-wrap: wrap; gap: 8px; max-height: 40px; overflow: hidden; }
+.table-filter-bar.expanded .table-filter-fields { max-height: none; }
 .stock-name-link { display: inline-flex; min-height: 48px; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
 .stock-name-primary { color: #1677ff; font-size: 14px; font-weight: 600; line-height: 1.2; }
 .stock-name-secondary { color: #8c8c8c; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; line-height: 1.2; }

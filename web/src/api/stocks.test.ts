@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addTrackedStock, fetchTrackedStocks } from './stocks';
+import { addTrackedStock, fetchTrackedStocks, searchStocks } from './stocks';
 
 describe('stock tracking api', () => {
   it('requests the tracking list', async () => {
@@ -16,5 +16,14 @@ describe('stock tracking api', () => {
     await addTrackedStock('600519.SH');
     globalThis.fetch = originalFetch;
     expect(capturedBody).toBe(JSON.stringify({ tsCode: '600519.SH' }));
+  });
+
+  it('searches stocks through the same-origin API path', async () => {
+    let capturedUrl = '';
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = async (input) => { capturedUrl = String(input); return new Response('[]', { status: 200 }); };
+    await expect(searchStocks('贵州')).resolves.toEqual([]);
+    globalThis.fetch = originalFetch;
+    expect(capturedUrl).toContain('/api/stocks/search?q=%E8%B4%B5%E5%B7%9E');
   });
 });

@@ -17,7 +17,7 @@ export interface StockDetail {
 }
 export interface StockSearchResult { tsCode: string; stockName: string; exchange: string; isTracked: boolean; }
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:3000';
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${apiBaseUrl}${path}`, init);

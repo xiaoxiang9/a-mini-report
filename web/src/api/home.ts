@@ -24,7 +24,7 @@ export function normalizeHomeSummary(input: unknown): HomeSummary {
 }
 
 export async function fetchHomeSummary(): Promise<HomeSummary> {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:3000';
+  const baseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
   const response = await fetch(`${baseUrl}/api/home/summary`);
   if (!response.ok) throw new Error(`HOME_SUMMARY_HTTP_${response.status}`);
   return normalizeHomeSummary(await response.json());

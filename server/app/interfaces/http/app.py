@@ -43,7 +43,7 @@ def create_app(
             "https://myxiang.online",
             "https://www.myxiang.online",
         ],
-        allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["Content-Type", "X-Task-Admin-Token"],
     )
     if home_use_case is None:

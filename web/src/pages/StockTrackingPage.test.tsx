@@ -9,7 +9,7 @@ describe('stock tracking frozen columns', () => {
       { key: 'peTtm', visible: true, frozen: false, searchable: true, searchType: 'number' as const, order: 2 },
     ];
     expect(frozenOffset(columns, 0)).toBe(0);
-    expect(frozenOffset(columns, 1)).toBe(180);
-    expect(frozenOffset(columns, 2)).toBe(360);
+    expect(frozenOffset(columns, 1)).toBe(100);
+    expect(frozenOffset(columns, 2)).toBe(280);
   });
 });

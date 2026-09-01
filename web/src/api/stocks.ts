@@ -21,7 +21,11 @@ const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '');
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${apiBaseUrl}${path}`, init);
-  if (!response.ok) throw new Error(`STOCK_API_HTTP_${response.status}`);
+  if (!response.ok) {
+    let detail = '';
+    try { const body = await response.json() as { detail?: string }; detail = body.detail ?? ''; } catch { /* empty response */ }
+    throw new Error(`STOCK_API_HTTP_${response.status}_${detail}`);
+  }
   return response.json() as Promise<T>;
 }
 

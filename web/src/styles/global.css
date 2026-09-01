@@ -7,7 +7,7 @@
 .stock-add-form input { flex: 1; padding: 13px 15px; color: var(--cream); background: #0d191b; border: 1px solid var(--line); border-radius: 4px; outline: none; }
 .stock-add-form input:focus { border-color: var(--gold); }
 .stock-search-box { position: relative; flex: 1; }.stock-search-box input { width: 100%; }.stock-suggestions { position: absolute; z-index: 3; top: calc(100% + 5px); left: 0; right: 0; display: grid; border: 1px solid var(--line); background: #102022; box-shadow: 0 12px 28px rgba(0,0,0,.35); }.stock-suggestions button { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; color: var(--cream); background: transparent; border: 0; border-bottom: 1px solid var(--line); text-align: left; cursor: pointer; }.stock-suggestions button:hover { background: #183033; }.stock-suggestions span { display: grid; gap: 5px; }.stock-suggestions small, .stock-suggestions em { color: var(--muted); font: 10px 'DM Mono', monospace; }.stock-suggestions em { color: var(--gold); font-style: normal; }
-.stock-add-form button, .text-button { padding: 11px 17px; color: #101818; background: var(--gold); border: 0; border-radius: 4px; cursor: pointer; }
+.stock-add-form button, .text-button { padding: 11px 17px; color: #101818; background: var(--gold); border: 0; border-radius: 4px; cursor: pointer; }.stock-add-form button:disabled { opacity: .45; cursor: not-allowed; }
 .stock-list { display: grid; gap: 10px; margin-top: 34px; }
 .stock-row { display: flex; align-items: center; gap: 12px; padding: 17px 18px; border: 1px solid var(--line); background: rgba(16,29,32,.86); }
 .stock-row > a { display: grid; grid-template-columns: 170px repeat(6, minmax(85px, 1fr)); align-items: center; gap: 18px; flex: 1; }

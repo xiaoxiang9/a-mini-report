@@ -29,7 +29,20 @@ DEFAULT_COLUMNS = (
 def validate_columns(columns: list[TableColumn]) -> tuple[TableColumn, ...]:
     if not columns:
         raise ValueError("TABLE_COLUMNS_EMPTY")
-    normalized = sorted(columns, key=lambda item: item.order)
+    submitted = sorted(columns, key=lambda item: item.order)
+    fixed = {
+        "stockName": TableColumn("stockName", True, True, True, "text", 0),
+        "tsCode": TableColumn("tsCode", True, True, True, "text", 1),
+    }
+    for key, expected in fixed.items():
+        item = next((candidate for candidate in submitted if candidate.key == key), None)
+        if item is not None and item != expected:
+            raise ValueError("IDENTITY_COLUMNS_LOCKED")
+    normalized = list(fixed.values())
+    normalized.extend(
+        TableColumn(item.key, item.visible, item.frozen, item.searchable, item.search_type, order)
+        for order, item in enumerate((item for item in submitted if item.key not in fixed and item.key != "operation"), start=2)
+    )
     operation = next((item for item in normalized if item.key == "operation"), None)
     if operation is None:
         normalized.append(TableColumn("operation", True, True, False, "none", len(normalized)))

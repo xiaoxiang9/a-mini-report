@@ -14,6 +14,7 @@ export function formatStockError(error: unknown): string {
   const message = error instanceof Error ? error.message : '';
   if (message.includes('FROZEN_COLUMNS_NOT_CONTIGUOUS')) return '冻结列必须从左侧连续设置，请先取消断档列后再保存';
   if (message.includes('IDENTITY_COLUMNS_LOCKED')) return '股票名称和股票代码为固定字段，不允许修改';
+  if (message.includes('UNKNOWN_TABLE_COLUMN')) return '表头配置包含无效字段，请刷新页面后重试';
   if (message.includes('IDENTITY_COLUMN_REQUIRED')) return '至少保留股票名称或股票代码列';
   if (message.includes('TABLE_COLUMNS_EMPTY')) return '至少保留一个表格字段';
   if (message.includes('404') || message.includes('STOCK_NOT_FOUND')) return '未找到这支股票，请检查名称或代码';

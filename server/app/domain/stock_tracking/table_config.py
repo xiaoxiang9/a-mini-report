@@ -24,12 +24,15 @@ DEFAULT_COLUMNS = (
     TableColumn("dataSource", True, False, False, "enum", 9),
     TableColumn("operation", True, True, False, "none", 10),
 )
+ALLOWED_COLUMN_KEYS = {item.key for item in DEFAULT_COLUMNS}
 
 
 def validate_columns(columns: list[TableColumn]) -> tuple[TableColumn, ...]:
     if not columns:
         raise ValueError("TABLE_COLUMNS_EMPTY")
     submitted = sorted(columns, key=lambda item: item.order)
+    if any(item.key not in ALLOWED_COLUMN_KEYS for item in submitted):
+        raise ValueError("UNKNOWN_TABLE_COLUMN")
     fixed = {
         "stockName": TableColumn("stockName", True, True, True, "text", 0),
         "tsCode": TableColumn("tsCode", True, True, True, "text", 1),

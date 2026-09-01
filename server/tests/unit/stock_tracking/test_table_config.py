@@ -37,6 +37,11 @@ def test_identity_columns_cannot_be_modified():
         validate_columns([TableColumn("stockName", True, False), TableColumn("tsCode")])
 
 
+def test_unknown_columns_are_rejected():
+    with pytest.raises(ValueError, match="UNKNOWN_TABLE_COLUMN"):
+        validate_columns([TableColumn("stockName", True, True, True, "text", 0), TableColumn("tsCode", True, True, True, "text", 1), TableColumn("legacyMetric", order=2)])
+
+
 def test_hidden_frozen_columns_do_not_break_visible_frozen_prefix():
     columns = validate_columns([
         TableColumn("stockName", True, True, True, "text", 0),

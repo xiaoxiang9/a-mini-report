@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from app.domain.tags.models import TagCategory, TagDefinition
 from app.domain.tags.repositories import TagRepository
 

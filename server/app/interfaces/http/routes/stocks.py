@@ -36,6 +36,7 @@ class StockResponse(BaseModel):
     historyStartDate: str | None
     historyEndDate: str | None
     historyCount: int
+    tags: list[dict[str, object]]
 
 
 class StockSearchResponse(BaseModel):
@@ -59,6 +60,7 @@ def _response(detail: StockDetail) -> StockResponse:
         historyStartDate=detail.history_start_date.isoformat() if detail.history_start_date else None,
         historyEndDate=detail.history_end_date.isoformat() if detail.history_end_date else None,
         historyCount=detail.history_count,
+        tags=list(detail.tags),
     )
 
 

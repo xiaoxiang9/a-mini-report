@@ -14,7 +14,11 @@ export interface StockDetail {
   dataSource: string | null;
   lastSyncedAt: string | null;
   syncError: string | null;
+  tags: StockTag[];
 }
+export interface StockTag { id: number; categoryId: number; categoryName: string; name: string; }
+export interface TagDefinition extends StockTag { sortOrder: number; usageCount: number; }
+export interface TagCategory { id: number; name: string; sortOrder: number; usageCount: number; tags: TagDefinition[]; }
 export interface StockSearchResult { tsCode: string; stockName: string; exchange: string; isTracked: boolean; }
 export interface TableColumn { key: string; visible: boolean; frozen: boolean; searchable: boolean; searchType: 'text' | 'number' | 'enum' | 'none'; order: number; }
 
@@ -54,3 +58,5 @@ export function removeTrackedStock(tsCode: string): Promise<StockDetail> {
 
 export function fetchStockTableConfig(): Promise<TableColumn[]> { return request<TableColumn[]>('/api/stocks/table-config'); }
 export function saveStockTableConfig(columns: TableColumn[]): Promise<TableColumn[]> { return request<TableColumn[]>('/api/stocks/table-config', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(columns) }); }
+export function fetchTagCategories(): Promise<TagCategory[]> { return request<TagCategory[]>('/api/tags'); }
+export function replaceStockTags(tsCode: string, tagIds: number[]): Promise<StockTag[]> { return request<StockTag[]>(`/api/stocks/${encodeURIComponent(tsCode)}/tags`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tagIds }) }); }

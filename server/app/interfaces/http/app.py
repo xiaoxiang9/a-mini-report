@@ -26,6 +26,10 @@ from app.interfaces.http.routes.tasks import build_tasks_router
 from app.interfaces.http.routes.table_config import build_table_config_router
 from app.application.task.service import TaskManagementService, TaskRuntimeService
 from app.infrastructure.task.sqlalchemy_repository import SqlAlchemyTaskRepository
+from app.application.tags.service import TagManagementService
+from app.domain.tags.repositories import TagRepository
+from app.infrastructure.tags.sqlalchemy_repository import SqlAlchemyTagRepository
+from app.interfaces.http.routes.tags import build_tags_router
 
 
 def create_app(
@@ -33,6 +37,7 @@ def create_app(
     database_checker: Callable[[], str] | None = None,
     stock_repository: StockTrackingRepository | None = None,
     stock_provider: StockDataProvider | None = None,
+    tag_repository: TagRepository | None = None,
 ) -> FastAPI:
     app = FastAPI(title="A股投资策略平台 API", version="0.1.0")
     app.add_middleware(
@@ -82,6 +87,9 @@ def create_app(
         SyncTrackedStocks(stock_repository, stock_provider),
         SearchStocks(stock_provider, stock_repository),
     ), prefix="/api")
+    if tag_repository is None:
+        tag_repository = SqlAlchemyTagRepository(SessionFactory())
+    app.include_router(build_tags_router(TagManagementService(tag_repository)), prefix="/api")
     task_repository = SqlAlchemyTaskRepository(SessionFactory())
     task_management = TaskManagementService(task_repository)
     task_runtime = TaskRuntimeService(task_repository, {

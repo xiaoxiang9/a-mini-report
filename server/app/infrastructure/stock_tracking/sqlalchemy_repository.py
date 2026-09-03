@@ -2,6 +2,7 @@ import json
 from datetime import date, datetime
 
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.domain.stock_tracking.models import StockDetail
@@ -12,8 +13,21 @@ class SqlAlchemyStockTrackingRepository:
     def __init__(self, session: Session) -> None:
         self._session = session
 
-    @staticmethod
-    def _to_detail(row: dict) -> StockDetail:
+    def _stock_tags(self, ts_code: str) -> tuple[dict[str, object], ...]:
+        try:
+            rows = self._session.execute(text("""
+                SELECT t.id, t.categoryId, c.name AS categoryName, t.name
+                FROM StockTagAssignment a JOIN StockTag t ON t.id=a.tagId
+                JOIN StockTagCategory c ON c.id=t.categoryId WHERE a.tsCode=:ts_code
+                ORDER BY c.sortOrder, t.sortOrder, t.id
+            """), {"ts_code": ts_code}).mappings()
+        except SQLAlchemyError:
+            self._session.rollback()
+            return ()
+        return tuple({"id": int(r["id"]), "categoryId": int(r["categoryId"]),
+                      "categoryName": r["categoryName"], "name": r["name"]} for r in rows)
+
+    def _to_detail(self, row: dict) -> StockDetail:
         history = json.loads(row["valuationHistoryJson"] or "[]")
         return StockDetail(
             ts_code=row["tsCode"], stock_name=row["stockName"], exchange=row["exchange"],
@@ -26,6 +40,7 @@ class SqlAlchemyStockTrackingRepository:
             history_start_date=row.get("historyStartDate"),
             history_end_date=row.get("historyEndDate"),
             history_count=safe_int(row.get("historyCount")) or 0,
+            tags=self._stock_tags(row["tsCode"]),
         )
 
     def _find(self, ts_code: str) -> StockDetail | None:

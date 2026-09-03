@@ -1,0 +1,29 @@
+CREATE TABLE IF NOT EXISTS StockTagCategory (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(64) NOT NULL,
+    sortOrder INT NOT NULL DEFAULT 0,
+    createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_stock_tag_category_name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS StockTag (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    categoryId BIGINT NOT NULL,
+    name VARCHAR(64) NOT NULL,
+    sortOrder INT NOT NULL DEFAULT 0,
+    createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_stock_tag_category_name (categoryId, name),
+    CONSTRAINT fk_stock_tag_category FOREIGN KEY (categoryId) REFERENCES StockTagCategory(id) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS StockTagAssignment (
+    tsCode VARCHAR(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+    tagId BIGINT NOT NULL,
+    createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (tsCode, tagId),
+    CONSTRAINT fk_stock_tag_assignment_stock FOREIGN KEY (tsCode) REFERENCES StockDetail(tsCode) ON DELETE CASCADE,
+    CONSTRAINT fk_stock_tag_assignment_tag FOREIGN KEY (tagId) REFERENCES StockTag(id) ON DELETE RESTRICT,
+    INDEX idx_stock_tag_assignment_tag (tagId)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

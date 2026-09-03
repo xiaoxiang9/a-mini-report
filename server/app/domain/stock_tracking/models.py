@@ -22,3 +22,4 @@ class StockDetail:
     history_start_date: date | None = None
     history_end_date: date | None = None
     history_count: int = 0
+    tags: tuple[dict[str, object], ...] = ()

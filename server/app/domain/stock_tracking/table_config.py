@@ -22,7 +22,8 @@ DEFAULT_COLUMNS = (
     TableColumn("pbPercentile", True, False, True, "number", 7),
     TableColumn("latestTradeDate", True, False, False, "text", 8),
     TableColumn("dataSource", True, False, False, "enum", 9),
-    TableColumn("operation", True, True, False, "none", 10),
+    TableColumn("tags", True, False, False, "none", 10),
+    TableColumn("operation", True, True, False, "none", 11),
 )
 ALLOWED_COLUMN_KEYS = {item.key for item in DEFAULT_COLUMNS}
 
